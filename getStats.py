@@ -10,69 +10,46 @@ import sqlite3
 from sqlite3 import Error
 import sys
 
-transactionList=[]
-pRefList=[]
-
 
 gameDate, startTime, attendance, stadium, gameDur = " " * 5
-teams = { 'ARI' : 'ARI',
-                    'ATL': 'ATL',
-                    'BAL': 'BAL',
-                    'BOS': 'BOS',
-                    'CHC': 'CHN',
-                    'CHW': 'CHA',
-                    'CIN': 'CIN',
-                    'CLE': 'CLE',
-                    'COL': 'COL',
-                    'DET': 'DET',
-                    'HOU': 'HOU',
-                    'KCR': 'KCA',
-                    'LAA': 'ANA',
-                    'LAD': 'LAN',
-                    'MIA': 'MIA',
-                    'MIL': 'MIL',
-                    'MIN': 'MIN',
-                    'NYM': 'NYN',
-                    'NYY': 'NYY',
-                    'OAK': 'OAK',
-                    'PHI': 'PHI',
-                    'PIT': 'PIT',
-                    'SDP': 'SDN',
-                    'SFG': 'SFN',
-                    'SEA': 'SEA',
-                    'STL': 'SLN',
-                    'TBR': 'TBA',
-                    'TEX': 'TEX',
-                    'TOR': 'TOR',
-                    'WAS': 'WAS'}
+teams = { 'CHC': 'CHN',
+            'CHW': 'CHA',
+            'KCR': 'KCA',
+            'LAA': 'ANA',
+            'LAD': 'LAN',
+            'NYM': 'NYN',
+            'SDP': 'SDN',
+            'SFG': 'SFN',
+            'STL': 'SLN',
+            'TBR': 'TBA'}
 
 battingNames = {"ATL":"AtlantaBravesbatting",
                     "ARI":"ArizonaDiamondbacksbatting",
                     "BAL":"BaltimoreOriolesbatting",
                     "BOS":"BostonRedSoxbatting",
-                    "CHC":"ChicagoCubsbatting",
-                    "CHW":"ChicagoWhiteSoxbatting",
+                    "CHN":"ChicagoCubsbatting",
+                    "CHA":"ChicagoWhiteSoxbatting",
                     "CIN":"CincinnatiRedsbatting",
                     "CLE":"ClevelandGuardiansbatting",
                     "COL":"ColoradoRockiesbatting",
                     "DET":"DetroitTigersbatting",
-                    "KCR":"KansasCityRoyalsbatting",
+                    "KCA":"KansasCityRoyalsbatting",
                     "HOU":"HoustonAstrosbatting",
-                    "LAA":"AnaheimAngelsbatting",
-                    "LAD":"LosAngelesDodgersbatting",
+                    "ANA":"AnaheimAngelsbatting",
+                    "LAN":"LosAngelesDodgersbatting",
                     "MIA":"MiamiMarlinsbatting",
                     "MIL":"MilwaukeeBrewersbatting",
                     "MIN":"MinnesotaTwinsbatting",
-                    "NYM":"NewYorkMetsbatting",
+                    "NYN":"NewYorkMetsbatting",
                     "NYY":"NewYorkYankeesbatting",
                     "OAK":"OaklandAthleticsbatting",
                     "PHI":"PhiladelphiaPhilliesbatting",
                     "PIT":"PittsburghPiratesbatting",
-                    "SDP":"SanDiegoPadresbatting",
+                    "SDN":"SanDiegoPadresbatting",
                     "SEA":"SeattleMarinersbatting",
-                    "SFG":"SanFranciscoGiantsbatting",
-                    "STL":"StLouisCardinalsbatting",
-                    "TBR":"TampaBayRaysbatting",
+                    "SFN":"SanFranciscoGiantsbatting",
+                    "SLN":"StLouisCardinalsbatting",
+                    "TBA":"TampaBayRaysbatting",
                     "TEX":"TexasRangersbatting",
                     "TOR":"TorontoBlueJaysbatting",
                     "WAS":"WashingtonNationalsbatting"}
@@ -81,55 +58,63 @@ pitchingNames = {"ATL":"AtlantaBravespitching",
                     "ARI":"ArizonaDiamondbackspitching",
                     "BAL":"BaltimoreOriolespitching",
                     "BOS":"BostonRedSoxpitching",
-                    "CHC":"ChicagoCubspitching",
-                    "CHW":"ChicagoWhiteSoxpitching",
+                    "CHN":"ChicagoCubspitching",
+                    "CHA":"ChicagoWhiteSoxpitching",
                     "CIN":"CincinnatiRedspitching",
                     "CLE":"ClevelandGuardianspitching",
                     "COL":"ColoradoRockiespitching",
                     "DET":"DetroitTigerspitching",
-                    "KCR":"KansasCityRoyalspitching",
+                    "KCA":"KansasCityRoyalspitching",
                     "HOU":"HoustonAstrospitching",
-                    "LAA":"AnaheimAngelspitching",
-                    "LAD":"LosAngelesDodgerspitching",
+                    "ANA":"AnaheimAngelspitching",
+                    "LAN":"LosAngelesDodgerspitching",
                     "MIA":"MiamiMarlinspitching",
                     "MIL":"MilwaukeeBrewerspitching",
                     "MIN":"MinnesotaTwinspitching",
-                    "NYM":"NewYorkMetspitching",
+                    "NYN":"NewYorkMetspitching",
                     "NYY":"NewYorkYankeespitching",
                     "OAK":"OaklandAthleticspitching",
                     "PHI":"PhiladelphiaPhilliespitching",
                     "PIT":"PittsburghPiratespitching",
-                    "SDP":"SanDiegoPadrespitching",
+                    "SDN":"SanDiegoPadrespitching",
                     "SEA":"SeattleMarinerspitching",
-                    "SFG":"SanFranciscoGiantspitching",
-                    "STL":"StLouisCardinalspitching",
-                    "TBR":"TampaBayRayspitching",
+                    "SFN":"SanFranciscoGiantspitching",
+                    "SLN":"StLouisCardinalspitching",
+                    "TBA":"TampaBayRayspitching",
                     "TEX":"TexasRangerspitching",
                     "TOR":"TorontoBlueJayspitching",
                     "WAS":"WashingtonNationalspitching"}
 
-
 def main():
-    homeTeam = sys.argv[1]
-    awayTeam = sys.argv[2]
-    gameDate = sys.argv[3]
-    team = teams[homeTeam]
+    hteam = sys.argv[1]
+    gameDate = sys.argv[2]
+    homeTeam=hteam
+    if homeTeam in teams.keys():
+        homeTeam = teams[homeTeam]
 
-    print()
-    print('    ' + homeTeam + ' vs ' + awayTeam)
-    print('-------------------')
-    url = 'https://www.baseball-reference.com/boxes/%s/%s%s0.shtml' % (team,team,gameDate)
+    url = 'https://www.baseball-reference.com/boxes/%s/%s%s0.shtml' % (homeTeam,homeTeam,gameDate)
     res = requests.get(url)
     comm = re.compile("<!--|-->")
     soup = BeautifulSoup(comm.sub("", res.text), 'html.parser')
 
-    scorebox = soup.find(attrs = {'class' : 'scorebox_meta'})
-    divs = scorebox.find_all('div')
-    gameDate = divs[0].text
-    startTime = divs[1].text
-    attendance = divs[2].text
-    stadium = divs[3].text
-    gameDur = divs[4].text
+    scorebox = soup.find(attrs = {'class' : 'scorebox'})
+    teamLinks=scorebox.select("a[href*=teams]")
+    ateam = (teamLinks[0]['href'].split('/')[2])
+    awayTeam=ateam
+    if awayTeam in teams.keys():
+        awayTeam = teams[awayTeam]
+
+    print()
+    print('    ' + hteam + ' vs ' + ateam)
+    print('------------------------')
+
+    gameMetadata = soup.find(attrs = {'class' : 'scorebox_meta'})
+    gameMetadataList = gameMetadata.find_all('div')
+    gameDate = gameMetadataList[0].text
+    startTime = gameMetadataList[1].text
+    attendance = gameMetadataList[2].text
+    stadium = gameMetadataList[3].text
+    gameDur = gameMetadataList[4].text
     #startTime = divs[1].text.strip("Start Time: ").replace(' Local','')
     #attendance = int(divs[2].text.strip("Attendance: ").replace(',',''))
     #stadium = divs[3].text.strip("Venue: ")
@@ -140,7 +125,7 @@ def main():
 
     print()
     print('------------------------------------------------------------')
-    print('                         ' + homeTeam + ' Batting')
+    print('                         ' + hteam + ' Batting')
     print('------------------------------------------------------------')
     homeBatting = soup.find_all("table", {"id":"%s" % battingNames[homeTeam]})
     data_rows = homeBatting[0].findAll('tr')
@@ -164,7 +149,7 @@ def main():
 
     print()
     print('------------------------------------------------------------')
-    print('                         ' + awayTeam + ' Batting')
+    print('                         ' + ateam + ' Batting')
     print('------------------------------------------------------------')
     awayBatting = soup.find_all("table", {"id":"%s" % battingNames[awayTeam]})
     data_rows = awayBatting[0].findAll('tr')
@@ -188,7 +173,7 @@ def main():
 
     print()
     print('------------------------------------------------------------------------')
-    print('                         ' + homeTeam + ' Pitching')
+    print('                         ' + hteam + ' Pitching')
     print('------------------------------------------------------------------------')
     homePitching = soup.find_all("table", {"id":"%s" % pitchingNames[homeTeam]})
     data_rows = homePitching[0].findAll('tr')
@@ -211,7 +196,7 @@ def main():
 
     print()
     print('------------------------------------------------------------------------')
-    print('                         ' + awayTeam + ' Pitching')
+    print('                         ' + ateam + ' Pitching')
     print('------------------------------------------------------------------------')
     awayPitching = soup.find_all("table", {"id":"%s" % pitchingNames[awayTeam]})
     data_rows = awayPitching[0].findAll('tr')
